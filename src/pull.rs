@@ -31,12 +31,6 @@ pub enum PullResult {
 mod tests {
     use super::*;
 
-    // Check if git pull succedded
-    // + Already up to date.
-    // + Updating 5a837f4..4c38a65
-    //   Fast-forward
-    //   1 file changed, 3 insertions(+), 1 deletion(-)
-    // - fatal: Need to specify how to reconcile divergent branches.
     #[test]
     fn test_check_pull_up_to_date() {
         let output = "Already up to date.
