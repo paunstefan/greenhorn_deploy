@@ -11,7 +11,7 @@ use tower_http::trace::TraceLayer;
 
 const X_HUB_SIGNATURE: &str = "X-Hub-Signature-256";
 const MAIN_BRANCH: &str = "refs/heads/main";
-const REPO_NAME: &str = "paunstefan/greenhorn";
+const REPO_NAME: &str = "paunstefan/greenhorn_data";
 
 struct State {
     path: PathBuf,
