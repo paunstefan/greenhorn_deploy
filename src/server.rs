@@ -11,12 +11,14 @@ use tower_http::trace::TraceLayer;
 
 const X_HUB_SIGNATURE: &str = "X-Hub-Signature-256";
 const MAIN_BRANCH: &str = "refs/heads/main";
+const REPO_NAME: &str = "paunstefan/greenhorn";
 
 struct State {
     path: PathBuf,
     signature: String,
 }
 
+/// Initializes the axum routes
 pub fn app(path: PathBuf, signature: String) -> Router {
     let shared_state = Arc::new(State { path, signature });
 
@@ -116,8 +118,9 @@ fn check_main_branch(body: &str) -> bool {
         Err(_) => return false,
     };
     let branch = &payload["ref"];
+    let repo = &payload["repository"]["full_name"];
 
-    branch == MAIN_BRANCH
+    repo == REPO_NAME && branch == MAIN_BRANCH
 }
 
 fn is_valid_signature(signature: &str, body: &str, secret: &str) -> bool {

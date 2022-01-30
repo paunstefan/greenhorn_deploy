@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf};
+use std::{env, net::SocketAddr, path::PathBuf};
 use tracing_subscriber::{filter, prelude::*};
 
 mod pull;
@@ -26,14 +26,18 @@ async fn main() {
     }
 
     let path = PathBuf::from(
-        args.get(1)
-            .expect("No path parameter given\nUsage: greenhorn_deploy [path_to_repo]"),
+        args.get(2)
+            .expect("Usage: greenhorn_deploy [address:port] [path_to_repo]"),
     );
+
+    let addr = args
+        .get(1)
+        .expect("Usage: greenhorn_deploy [address:port] [path_to_repo]");
 
     let signature =
         env::var("GREENHORN_DEPLOY_SIGNATURE").expect("GREENHORN_DEPLOY_SIGNATURE not set");
 
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 8765));
+    let addr: SocketAddr = addr.parse().expect("Address:port not valid");
 
     tracing::debug!("listening on {}", addr);
 
