@@ -36,13 +36,15 @@ async fn main() {
 
     let signature =
         env::var("GREENHORN_DEPLOY_SIGNATURE").expect("GREENHORN_DEPLOY_SIGNATURE not set");
+    let main_branch = env::var("GREENHORN_MAIN_BRANCH").expect("GREENHORN_MAIN_BRANCH not set");
+    let repo_name = env::var("GREENHORN_REPO_NAME").expect("GREENHORN_REPO_NAME not set");
 
     let addr: SocketAddr = addr.parse().expect("Address:port not valid");
 
     tracing::debug!("listening on {}", addr);
 
     axum::Server::bind(&addr)
-        .serve(server::app(path, signature).into_make_service())
+        .serve(server::app(path, signature, main_branch, repo_name).into_make_service())
         .await
         .unwrap();
 }

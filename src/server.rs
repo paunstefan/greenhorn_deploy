@@ -10,17 +10,22 @@ use std::{path::PathBuf, sync::Arc};
 use tower_http::trace::TraceLayer;
 
 const X_HUB_SIGNATURE: &str = "X-Hub-Signature-256";
-const MAIN_BRANCH: &str = "refs/heads/main";
-const REPO_NAME: &str = "paunstefan/greenhorn_data";
 
 struct State {
     path: PathBuf,
     signature: String,
+    main_branch: String,
+    repo_name: String,
 }
 
 /// Initializes the axum routes
-pub fn app(path: PathBuf, signature: String) -> Router {
-    let shared_state = Arc::new(State { path, signature });
+pub fn app(path: PathBuf, signature: String, main_branch: String, repo_name: String) -> Router {
+    let shared_state = Arc::new(State {
+        path,
+        signature,
+        main_branch,
+        repo_name,
+    });
 
     Router::new()
         .route("/payload", post(process_request_body))
@@ -82,7 +87,7 @@ async fn process_request_body(
     };
 
     let ret;
-    if check_main_branch(&body) {
+    if check_main_branch(&body, &state.repo_name, &state.main_branch) {
         if is_valid_signature(&signature, &body, &state.signature) {
             ret = match crate::pull::execute_pull_request(&state.path) {
                 Ok(a) => {
@@ -112,7 +117,7 @@ async fn process_request_body(
     ret
 }
 
-fn check_main_branch(body: &str) -> bool {
+fn check_main_branch(body: &str, repo_name: &str, main_branch: &str) -> bool {
     let payload: Value = match serde_json::from_str(body) {
         Ok(d) => d,
         Err(_) => return false,
@@ -120,7 +125,7 @@ fn check_main_branch(body: &str) -> bool {
     let branch = &payload["ref"];
     let repo = &payload["repository"]["full_name"];
 
-    repo == REPO_NAME && branch == MAIN_BRANCH
+    repo == repo_name && branch == main_branch
 }
 
 fn is_valid_signature(signature: &str, body: &str, secret: &str) -> bool {
